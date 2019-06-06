@@ -10,7 +10,7 @@ void listar();
 void usuario();
 void confincluir();
 void cp();
-
+//teste
 struct ferramenta{
 	int cod;
 	char prod[20];
