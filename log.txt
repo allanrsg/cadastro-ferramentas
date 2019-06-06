@@ -1,0 +1,24 @@
+Logado como Administrador 
+MENU 
+MENU 
+MENU 
+MENU 
+Logado como Administrador 
+MENU 
+INCLUIR  FERRAMENTA 
+checkpoint(precisa confirmar tarefa...) 
+INCLUSÃO DE FERRAMENTA CANCELADA 
+MENU 
+INCLUIR  FERRAMENTA 
+checkpoint(precisa confirmar tarefa...) 
+INCLUSÃO DE FERRAMENTA CONCLUIDA 
+INCLUIR  FERRAMENTA 
+checkpoint(precisa confirmar tarefa...) 
+INCLUSÃO DE FERRAMENTA CONCLUIDA 
+MENU 
+LISTAR PRODUTOS 
+LISTAGEM CONCLUIDA 
+MENU 
+LISTAR PRODUTOS 
+LISTAGEM CONCLUIDA 
+MENU 

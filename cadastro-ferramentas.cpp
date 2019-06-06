@@ -41,7 +41,7 @@ do{
 	gotoxy(10,3);printf("---MENU FERRAMENTA---");
 	gotoxy(10,4);printf("=================");
 	gotoxy(10,6);printf("1 - Incluir ferramenta");
-	gotoxy(10,7);printf("2 - Listar produtos");//
+	gotoxy(10,7);printf("2 - Alterar produtos");//
 	gotoxy(10,8);printf("3 - Excluir produto");
 	gotoxy(10,9);printf("4 - Listar");
 	gotoxy(10,11);printf("5 - Sair");
@@ -51,6 +51,7 @@ do{
 		case '1':incluir();break;
 		case '2':alterar();break;
 		case '3':remover();break;
+		case '4':listar(); break;
 		case '5':clrscr();
 			gotoxy(10,10);	printf("Programa encerrado");
 				arquivo=fopen("log.txt","ab");
