@@ -3,6 +3,7 @@
 #include<string.h>
 #include<locale.h>
 
+
 void incluir();
 void alterar();
 void remover();
@@ -10,11 +11,11 @@ void listar();
 void usuario();
 void confincluir();
 void cp();
-//teste teste2
+
 struct ferramenta{
 	int cod;
 	char prod[20];
-	char confirmar;
+	char confirmar, blc, blt;
 }reg;
 
 struct user{	
@@ -29,10 +30,9 @@ char resposta, login[15] = "Admin", login1[15];
 int senha =1234, senha1, teste;
 
 main(){
-	setlocale(LC_ALL,"Portuguese");
 char opcao;
 
-usuario();
+//usuario();
 do{	
 	arquivo=fopen("log.txt","ab");
 	fprintf(arquivo, "MENU \n");
@@ -41,7 +41,7 @@ do{
 	gotoxy(10,3);printf("---MENU FERRAMENTA---");
 	gotoxy(10,4);printf("=================");
 	gotoxy(10,6);printf("1 - Incluir ferramenta");
-	gotoxy(10,7);printf("2 - Alterar produtos");//
+	gotoxy(10,7);printf("2 - Alterar produtos");
 	gotoxy(10,8);printf("3 - Excluir produto");
 	gotoxy(10,9);printf("4 - Listar");
 	gotoxy(10,11);printf("5 - Sair");
@@ -51,7 +51,7 @@ do{
 		case '1':incluir();break;
 		case '2':alterar();break;
 		case '3':remover();break;
-		case '4':listar(); break;
+		case '4':listar();break;
 		case '5':clrscr();
 			gotoxy(10,10);	printf("Programa encerrado");
 				arquivo=fopen("log.txt","ab");
@@ -84,6 +84,9 @@ void incluir(){
 			gotoxy(10,8);	printf("Descrição da ferramenta...: ");	
 				fflush(stdin);
 				fgets(reg.prod,20,stdin);
+			gotoxy(10,9); printf("Bloqueio?");
+				reg.blc= getchar();
+				reg.blt=0;
 
 		cp();
 			gotoxy(10,10);	printf("Confirmar? ");
@@ -121,16 +124,26 @@ void alterar(){
 		fprintf(arquivo, "ALTERAR \n");
 		fclose(arquivo);
 			achei=0;
+			
+			reg.blt='U';//bloqueia o arquivo ferramenta
+			
 			clrscr();
 			gotoxy(10,3);	printf("Alterar produto");
 			gotoxy(10,7);
 			printf("Nome do Produto: ");
 			fflush(stdin);
 			fgets(nomepesq,20,stdin);
-			
+				if(reg.blc == 's' || reg.blc== 'S')
+					{
+						
+					gotoxy(10,8); printf("ARQUIVO BLOQUEADO PARA ALTERAR!");
+							
+					}
+				
 			rewind(arq);
 			apontador=0;
 			while(!feof(arq) && achei ==0){
+			
 				teste=fread(&reg,sizeof(struct ferramenta), 1,arq);
 				apontador++;
 				if(teste){
@@ -149,6 +162,15 @@ void alterar(){
 						
 						gotoxy(40,20);	printf("Confirma a edição? S/N");
 						cp();
+						if(reg.blc == 's' || reg.blc== 'S')
+						{
+							
+							clrscr();
+							gotoxy(10,16); printf("ARQUIVO BLOQUEADO PARA ALTERAR!");
+							resposta=='n'	;
+							
+							
+						}
 						gotoxy(63,20);  resposta=getche();
 						if(resposta=='s' || resposta=='S'){
 							apontador--;
@@ -198,7 +220,8 @@ void alterar(){
 	}
 }
 
-void remover(){							
+void remover(){
+							
 	char nomepesq[30];
 	int achei, apontador;
 	resposta='S';	
@@ -218,7 +241,8 @@ if(arq)	{
 		
 		rewind(arq);	
 		apontador=0;
-		while(!feof(arq)&& achei==0){
+		while(!feof(arq)&& achei==0)
+		{
 			teste=fread(&reg,sizeof(struct ferramenta),1,arq);
 			apontador++;
 			if(teste){
@@ -231,36 +255,46 @@ if(arq)	{
 							fclose(arquivo);
 					gotoxy(10,12);	printf("Codigo..: %i", reg.cod);
 					gotoxy(10,13);	printf("Descrição....: %s", reg.prod);
-				
-		
+					gotoxy(10,14);	printf("Bloqueio: %c,", reg.blc);
 					achei=1;
 					
 
 					reg.cod=0;
 					strcpy(reg.prod," ");
 				
-				cp();
+					cp();
 					gotoxy(10,19);	printf("Confirma a exclusão? S/N");
+					
+					if(reg.blc == 's' || reg.blc== 'S')
+						{
+							clrscr();
+							gotoxy(10,16); printf("ARQUIVO BLOQUEADO PARA REMOÇÃO!");
+							resposta=='n'	;
+						}
+		
 					gotoxy(35,19);	resposta=getche();
 				
-					if(resposta=='s' || resposta=='S'){
-						apontador--;
-						fseek(arq, apontador * sizeof(struct ferramenta), SEEK_SET);
-						teste=fwrite(&reg, sizeof(struct ferramenta),1, arq );
-						if(teste){
-							gotoxy(10,19);
-							printf("Registro excuido com sucesso.");
-							arquivo=fopen("log.txt","ab");
-							fprintf(arquivo, "PRODUTO PESQUISADO EXCLUIDO \n");
-							fclose(arquivo);
+				
+						if(resposta=='s' || resposta=='S'){
+							apontador--;
+							fseek(arq, apontador * sizeof(struct ferramenta), SEEK_SET);
+							teste=fwrite(&reg, sizeof(struct ferramenta),1, arq );
+							if(teste){
+								gotoxy(10,19);
+								printf("Registro excuido com sucesso.");
+								arquivo=fopen("log.txt","ab");
+								fprintf(arquivo, "PRODUTO PESQUISADO EXCLUIDO \n");
+								fclose(arquivo);
+							}
+						
 						}
+							else{
+								arquivo=fopen("log.txt","ab");
+									fprintf(arquivo, "EXCLUSÃO CANCELADA! \n");
+									fclose(arquivo);
+							}
 					
-					}
-					else{
-						arquivo=fopen("log.txt","ab");
-							fprintf(arquivo, "EXCLUSÃO CANCELADA! \n");
-							fclose(arquivo);
-					}
+						
 				}
 			}
 		}
@@ -286,7 +320,7 @@ if(arq)	{
 			gotoxy(10,10);	printf("Tecle algo para voltar ao menu..");
 			getch();
 		}
-}
+	}
 
 void usuario(){
 	clrscr();
@@ -322,7 +356,7 @@ arq=fopen("ferramenta.txt","rb");
 	clrscr();
 	if(arq){		
 	gotoxy(10,3);	printf("PRODUTOS");
-	gotoxy(10,4);	printf("Código  Produto             Quantidade");
+	gotoxy(10,4);	printf("Código  Produto    Bloqueio");
 		while(!feof(arq))
 		{		
 		teste=fread(&reg, sizeof(struct ferramenta), 1,arq);
@@ -330,6 +364,7 @@ arq=fopen("ferramenta.txt","rb");
 		{
 		gotoxy(10,linha);	printf("%04i", reg.cod);
 		gotoxy(15,linha);	puts(reg.prod);
+		gotoxy(30, linha);	printf("%c %c",reg.blc, reg.blt);
 
 			if(linha<17)
 			linha++;
