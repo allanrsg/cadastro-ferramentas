@@ -7,22 +7,21 @@ void incluir();
 void alterar();
 void remover();
 void listar();
-void cadastrosecundario();
 
-void transacao();
+int transacao();
 void commit();
 void rollback();
 
 struct copy{
-	int codcop;	char prodcop[20];
+	int codc,bloqueio;	char prodc[30] ;
 }cp;
 
 struct ferramenta{
-	int cod; 	char prod[20], confirmar;
+	int cod, bloqueio; 	char prod[30], confirmar;
 }reg;
 
 struct commit{
-	int codi;	char prodi[20];
+	int codi;	char prodi[30];
 }com;
 
 FILE *log;
@@ -34,231 +33,266 @@ char resposta;
 int testecommit, teste, tr=0;
 
 main(){
-char opcao;
-	listar();
-do{
 
-	listar();
+char opcao;
+
+do{
+clrscr();
+	tr++;
    	gotoxy(19,3);printf("---BANCO DE DADOS---");
-   	gotoxy(10,19);	printf("1 - NOVA TRANSAÇÃO");
-	gotoxy(35,19);	printf("2 - CHECKPOINT");//não esta em uso no momento
-	gotoxy(15,21);	printf("3 -  EXISTE DEADLOCK?");//não esta em uso no momento
-	gotoxy(25, 23);	printf("4 - Sair! ");
-	gotoxy(25,25);	printf("Opção: ");
-	gotoxy(32,25);	opcao=getche();
+   	gotoxy(10,9);	printf("1 - NOVA TRANSAÇÃO");
+	gotoxy(10,10);	printf("2 - CHECKPOINT");//não esta em uso no momento
+	gotoxy(10,11);	printf("3 - EXISTE DEADLOCK?");
+	gotoxy(10,12);	printf("4 - LISTAR BANCO");//não esta em uso no momento
+	gotoxy(10,13);	printf("5 - Sair! ");
+	gotoxy(10,15);	printf("Opção: ");
+	gotoxy(17,15);	opcao=getche();
 
 	switch(opcao){
-		case '9':cadastrosecundario();
+	
 		case '1':transacao();break;
-		case '2':listar();break;
+		case '2':listar(); ;break;
 		//case '3':();break;
-		case '4':clrscr();
+		case'4':listar();break;
+		case '5':clrscr();
 			gotoxy(10,10);	printf("Programa encerrado");
 			gotoxy(12,12);	printf("Tecle algo para sair");
+			log=fopen("log.txt", "ab");	fprintf(log,"Programa encerrado!\n");fclose(log);
 			break;
 			default:
    			gotoxy(35,25);printf("Opção Inválida.");
 			getch();
 		}
-}while(opcao!='4');
+}while(opcao!='5');
 
 }
-void transacao(){
+int transacao(){
 	char opcao;
-	log=fopen("log.txt","ab");
-	tr=tr+1;
-	fprintf(log,"Iniciou T""%i \n",tr);
-	fclose(log);
+	
+	
+	log=fopen("log.txt","ab");	fprintf(log,"Iniciou T""%i \n",tr);fclose(log);
+
 	do{
 	clrscr();
-	listar();
-	gotoxy(19,3);printf("---BANCO DE DADOS---");
-	gotoxy(10,19);printf("1-INSERIR");
-	gotoxy(22,19);printf("2-ALTERAR");
-	gotoxy(34,19);printf("3-REMOVER");
-	gotoxy(15, 21);printf("4-COMMIT");
-	gotoxy(26, 21);printf("5-ROLLBACK");//não esta em uso no momento
-	gotoxy(25,25);printf("Opção: ");
-	gotoxy(32,25);opcao=getche();
+	gotoxy(19,3);printf("---TRANSAÇÃO %i---", tr);
+	gotoxy(10,9);printf("1 - INCLUIR");
+	gotoxy(10,10);printf("2 - ALTERAR");
+	gotoxy(10,11);printf("3 - REMOVER");
+	gotoxy(10,12);printf("4 - COMMIT");
+	gotoxy(10, 13);printf("5 - ROLLBACK");
+	gotoxy(10,14);printf("6 - VOLTAR MENU PRINCIPAL");
+	gotoxy(10,16);printf("Opção: ");
+	gotoxy(17,16);opcao=getche();
 	switch(opcao){
 		case '1':incluir();break;
 		case '2':alterar();break;
 		case '3':remover();break;
 		case '4':commit();break;
-		case '5':clrscr();
-			gotoxy(12,12);	printf("Tecle algo para retornar!");  getch();clreol();
+		case '5':rollback();break;
+		case '6':clrscr();
+		log=fopen("log.txt", "ab");
+		fprintf(log," T%i saiu \n",tr);
+			fclose(log);
 			break;
-		default:gotoxy(10,15);printf("Opção Inválida.");
-				gotoxy(12,17);printf("Escolha uma opção válida.");
+		default:gotoxy(17,16);printf("Opção Inválida.");
 				getch();
 		}
-}while(opcao!='5');
+}while(opcao!='6');
+return tr;
 }
+
 
 void incluir(){
 	char confirmar;
-	resposta='S';
-
-
+	//resposta='S';
+	log=fopen("log.txt", "ab");	arq=fopen("memoria.txt","ab");
 	if(arq){
-		while(resposta=='S' || resposta=='s'){
-			 arq=fopen("memoria.txt","ab");
+	//	while(resposta=='S' || resposta=='s'){
+		
 			clrscr();
-			gotoxy(10,3);	printf("Cadastro ferramenta");
+			gotoxy(10,3);	printf("---Incluir ferramenta---");
 			gotoxy(10,7);	printf("Código da ferramenta......: ");
 				scanf("%i", &reg.cod);
 			gotoxy(10,8);	printf("Descrição da ferramenta...: ");
 				fflush(stdin);
-				fgets(reg.prod,20,stdin);
+				fgets(reg.prod,30,stdin);
+				reg.bloqueio=0;
+				teste=fwrite(&reg,sizeof(struct ferramenta), 1, arq);
+				
+				fprintf(log,"T%i incluiu Cod %i Produto %s \n",tr, reg.cod, reg.prod);
+				gotoxy(10,14);
+				printf("Registro gravado com sucesso!");
+				
+			gotoxy(10,20);	printf("Pressione algo para continuar?");
+			resposta=getche();
+			fwrite(&com, sizeof(struct ferramenta),1,log);
+		}
+		fclose(log);fclose(arq);
+}
 
-				teste=fwrite(&reg,sizeof(struct commit), 1, arq);
-				fclose(arq);
 
-					gotoxy(10,14);
-					printf("Registro gravado com sucesso!");
-					fclose(arq);
-			gotoxy(10,20);	printf("Deseja continuar?");
+void alterar(){
+	char nomepesq[30];
+	int achei, apontador, codant;
+						
+	resposta='s';
+	
+	mem=fopen("memoria.txt", "rb+");
+	arq=fopen("memoria.txt", "rb+"); 
+	log=fopen("log.txt", "ab");
+	
+	if(arq){
+		while (resposta=='s' || resposta=='S'){
+			achei=0;
+			clrscr();
+			gotoxy(10,3);	printf("---Editar produto---");
+			gotoxy(10,5);	printf("============================");
+			gotoxy(10,7);
+			printf("Produto a ser pesquisado: ");
+			fflush(stdin);
+			fgets(nomepesq,30,stdin);
+			
+			rewind(arq);
+			apontador=0;
+			while(!feof(arq) && achei ==0){
+				teste=fread(&reg,sizeof(struct ferramenta), 1,arq);
+				apontador++;
+				if(teste){
+						
+					if(strcmp(reg.prod,nomepesq)==0 && reg.bloqueio==0){
+						apontador--;
+						reg.bloqueio=1;
+							fseek(mem,apontador * sizeof(struct ferramenta), SEEK_SET);
+							teste=fwrite(&reg,sizeof(struct ferramenta), 1, mem);fclose(mem);
+							apontador++;
+						
+						gotoxy(10,13);	printf("Código..: %i", reg.cod);
+						gotoxy(10,14);	printf("Nome....: %s", reg.prod);	
+						achei=1;
+						codant=reg.cod;
+						
+						
+						gotoxy(40,10);	printf("Editando o registro...");
+						
+						gotoxy(40,13);	printf("Código: " );	scanf("%i",&cp.codc);
+						gotoxy(40,14);	printf("Produto: ");		fflush(stdin);
+																fgets(cp.prodc,20,stdin);
+						
+						
+
+						
+						gotoxy(40,20);	printf("Confirma a edição? S/N  ");
+						gotoxy(63,20);  resposta=getche();
+						
+						
+						if(resposta=='s' || resposta=='S'){
+							log=fopen("log.txt", "ab");fprintf(log," T%i alterou cod %i  produto %s para cod %i produto %s \n",tr,codant, nomepesq, cp.codc, cp.prodc);fclose(log);
+							apontador--;
+							reg.bloqueio=0;
+							fseek(arq,apontador * sizeof(struct copy), SEEK_SET);
+							teste=fwrite(&cp,sizeof(struct copy), 1, arq);
+							if(teste){
+								gotoxy(40,20);
+								printf("Registro editado com sucesso");
+							}					
+						}
+						else{
+							apontador--;
+							reg.bloqueio=0;
+							fseek(arq,apontador * sizeof(struct ferramenta), SEEK_SET);
+							teste=fwrite(&reg,sizeof(struct ferramenta), 1, arq);
+						}
+						
+					}			
+				}
+			}
+			if(achei==0){
+				gotoxy(10,12);	printf("Registro não encontrado.");			
+			}
+			gotoxy(10,22);		printf("Deseja continuar? S/N");			
 			resposta=getche();
 		}
-
+		fclose(arq);
+	}
+	else{
+		clrscr();
+		gotoxy(10,8);	printf("Arquivo Vazio.");
+		gotoxy(10,10);	printf("Tecle algo para voltar");
+		getch();
 	}
 }
 
-void alterar(){
- char nomepesq[30];	int achei, apontador;
-resposta='s';
-arq=fopen("ferramenta.txt", "rb+");
-if(arq){
-			 while (resposta=='s' || resposta=='S'){
-			   achei=0;
-				clrscr();
-				gotoxy(10,3);	printf("Alterar produto");
-				gotoxy(10,7); 	printf("Nome do Produto: ");
-				fflush(stdin); 	fgets(nomepesq,20,stdin);
-				rewind(arq);
-				apontador=0;
-				while(!feof(arq) && achei ==0){
-						teste=fread(&reg,sizeof(struct ferramenta), 1,arq);
-						apontador++;
-						if(teste){
-							if(strcmp(reg.prod,nomepesq)==0){
-
-								gotoxy(10,13);	printf("Código..: %i", reg.cod);
-								gotoxy(10,14);	printf("Nome....: %s", reg.prod);
-								fclose(arq);
-								achei=1;
-								mem=fopen("memoria.txt","ab");
-        						gotoxy(40,10);	printf("Editar Produto...");
-								gotoxy(40,13);	printf("Código: " );	scanf("%i",&com.codi);
-								gotoxy(40,14);	printf("Nome: ");		fflush(stdin);
-																		fgets(com.prodi,20,stdin);
-								gotoxy(40,20);	printf("Confirma a edição? S/N");
-								gotoxy(63,20);  resposta=getche();
-
-								if(resposta=='s' || resposta=='S'){
-									apontador--;
-
-									fseek(mem,apontador * sizeof(struct commit), SEEK_END);
-									teste=fwrite(&com,sizeof(struct commit), 1, mem);
-									fclose(mem);
-									if(teste){
-										gotoxy(40,20);
-										printf("Registro editado com sucesso");
-		                           	}
-								}
-							}
-						}
-					if(achei==0){
-						gotoxy(10,12);	printf("Registro não encontrado.");
-					}
-
-
-				}
-				gotoxy(10,22);		printf("Deseja continuar? S/N");
-				resposta=getche();
-			 }
-		}
-
-		else{
-				clrscr();
-				gotoxy(10,8);	printf("Arquivo Vazio.");
-				gotoxy(10,10);	printf("Tecle algo para voltar");
-				getch();
-		}
-}
 
 void remover(){
 
-	char nomepesq[30];
-	int achei, apontador;
+	char nomepesq[30], remprod[30];
+	int achei, apontador, remcod=0;
 	resposta='S';
-	arq=fopen("ferramenta.txt","rb+");
+	mem=fopen("memoria.txt","rb+");
+	arq=fopen("memoria.txt","rb+");
 if(arq)	{
 	while(resposta=='S'||resposta=='s'){
-		arquivo=fopen("log.txt","ab");
-							fprintf(arquivo, "EXCLUIR PRODUTO \n");
-							fclose(arquivo);
+		
+					
 		achei=0;
 		clrscr();
-		gotoxy(10,3);	printf("Exclui Produto");
+		gotoxy(10,3);	printf("---Exclui Produto---");
 		gotoxy(10,7);
 		printf("Qual o nome do produto: ");
 		fflush(stdin);
-		fgets(nomepesq,20,stdin);
-
+		fgets(nomepesq,30,stdin);
+		
 		rewind(arq);
 		apontador=0;
 		while(!feof(arq)&& achei==0)
 		{
 			teste=fread(&reg,sizeof(struct ferramenta),1,arq);
 			apontador++;
-			if(teste){
-
-				if(strcmp(reg.prod,nomepesq)==0){
-
+			if(teste && reg.bloqueio!=1){
+				if(strcmp(reg.prod,nomepesq)==0 && reg.bloqueio==0){
+						apontador--;
+						reg.bloqueio=1;
+							fseek(mem,apontador * sizeof(struct ferramenta), SEEK_SET);
+							teste=fwrite(&reg,sizeof(struct ferramenta), 1, mem);fclose(mem);
+							apontador++;
+					
 					gotoxy(10,8);	printf("Pesquisa realizada com sucesso");
-					arquivo=fopen("log.txt","ab");
-							fprintf(arquivo, "PRODUTO PESQUISADO \n");
-							fclose(arquivo);
-					gotoxy(10,12);	printf("Codigo..: %i", reg.cod);
+									gotoxy(10,12);	printf("Codigo..: %i", reg.cod);
+									remcod=reg.cod;
 					gotoxy(10,13);	printf("Descrição....: %s", reg.prod);
-
 					achei=1;
-
-
-					reg.cod=0;
-					strcpy(reg.prod," ");
-
-
+					
 					gotoxy(10,19);	printf("Confirma a exclusão? S/N");
-
-
-
 					gotoxy(35,19);	resposta=getche();
-
-
 						if(resposta=='s' || resposta=='S'){
 							apontador--;
+							reg.cod=0;
+							strcpy(reg.prod," ");
+							reg.bloqueio=3;
 							fseek(arq, apontador * sizeof(struct ferramenta), SEEK_SET);
 							teste=fwrite(&reg, sizeof(struct ferramenta),1, arq );
+							
 							if(teste){
 								gotoxy(10,19);
 								printf("Registro excuido com sucesso.");
-								arquivo=fopen("log.txt","ab");
-								fprintf(arquivo, "PRODUTO PESQUISADO EXCLUIDO \n");
-								fclose(arquivo);
+								log=fopen("log.txt", "ab");fprintf(log,"T%i removeu %i   %s \n",tr, remcod, nomepesq);fclose(log);	
 							}
 
 						}
-							else{
-								arquivo=fopen("log.txt","ab");
-									fprintf(arquivo, "EXCLUSÃO CANCELADA! \n");
-									fclose(arquivo);
+						else{
+							apontador--;
+							reg.bloqueio=0;
+							fseek(arq, apontador * sizeof(struct ferramenta), SEEK_SET);
+							teste=fwrite(&reg, sizeof(struct ferramenta),1, arq );
+						
 							}
 
 
 				}
+				
 			}
+			else{
+			clrscr();gotoxy(10,10);printf("BLOQUEADO PARA EXCLUSÃO");}
 		}
 					if(achei==0){
 						gotoxy(10,12);
@@ -276,9 +310,6 @@ if(arq)	{
 		else{
 			clrscr();
 			gotoxy(10,8);	printf("Arquivo vazio.");
-			arquivo=fopen("log.txt","ab");
-							fprintf(arquivo, "ERRO - ARQUIVO VAZIO! \n");
-							fclose(arquivo);
 			gotoxy(10,10);	printf("Tecle algo para voltar ao menu..");
 			getch();
 		}
@@ -286,18 +317,20 @@ if(arq)	{
 
 void listar(){
 int linha=5;
-arq=fopen("ferramenta.txt","rb");
+	tr--;
+arq=fopen("memoria.txt","rb");
 	clrscr();
 	if(arq){
-	gotoxy(10,4);	printf("Código  Produto");
+	gotoxy(19,3);printf("---BANCO DE DADOS---");
+	gotoxy(10,4);	printf("Código  Produto  Bloqueio");
 		while(!feof(arq))
 		{
 		teste=fread(&reg, sizeof(struct ferramenta), 1,arq);
 		if(teste && strcmp(reg.prod, ""))
 		{
 		gotoxy(10,linha);	printf("%04i", reg.cod);
-		gotoxy(15,linha);	puts(reg.prod);
-
+		gotoxy(18,linha);	puts(reg.prod);
+		gotoxy(27,linha);	printf("%i", reg.bloqueio);
 
 			if(linha<17)
 			linha++;
@@ -310,18 +343,19 @@ arq=fopen("ferramenta.txt","rb");
 				}
 		}
 		}
-		fclose(arq);
+		fclose(arq);gotoxy(10, linha+5); printf("Tecle algo para voltar...");
 	}
 		else{
 			gotoxy(10,19);	printf("Arquivo vazio.");
 			gotoxy(10,10);	printf("Tecle algo para voltar ao menu...");
 			getch();
 		}
+		getch();
 }
 
 void commit(){
-int linha=5;
-mem=fopen("memoria.txt","rb");	arq=fopen("commit.txt","ab");
+/*int linha=5;
+mem=fopen("memoria.txt","rb");	arq=fopen("ferramenta.txt","ab");	
 	if(mem){
 		do{
 			teste=fread(&cp, sizeof(struct commit), 1,mem);
@@ -329,43 +363,8 @@ mem=fopen("memoria.txt","rb");	arq=fopen("commit.txt","ab");
 			//fseek(arq, sizeof(struct copy),SEEK_END);
 		} while(!feof(mem)) ;
 	}
-fclose(arq); fclose(mem);
+fclose(arq); fclose(mem);getche();*/
 }
 
-void cadastrosecundario(){
-	char confirmar;
-	resposta='S';
-	arq=fopen("ferramenta.txt","ab");
+void rollback(){}
 
-	if(arq){
-		while(resposta=='S' || resposta=='s'){
-
-			clrscr();
-			gotoxy(10,3);	printf("Cadastro ferramenta");
-			gotoxy(10,7);	printf("Código da ferramenta......: ");
-				scanf("%i", &reg.cod);
-			gotoxy(10,8);	printf("Descrição da ferramenta...: ");
-				fflush(stdin);
-				fgets(reg.prod,20,stdin);
-
-
-
-			gotoxy(10,10);	printf("Confirmar? ");
-				confirmar=getche();
-				clrscr();
-			if(confirmar=='S'|| confirmar=='s'){
-				teste=fwrite(&reg,sizeof(struct ferramenta), 1, arq);
-
-				if(teste){
-					gotoxy(10,14);
-					printf("Registro gravado com sucesso!");
-
-				}
-			}
-
-			gotoxy(10,20);	printf("Deseja continuar?");
-			resposta=getche();
-		}
-		fclose(arq);
-	}
-}
