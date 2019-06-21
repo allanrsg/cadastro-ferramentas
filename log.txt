@@ -1,3 +1,4 @@
-T1 incluiu Cod 789 Produto prego
+T5 incluiu Cod 2 Produto alicate
  
-Programa encerrado!
+Iniciou T6 
+Iniciou T7 

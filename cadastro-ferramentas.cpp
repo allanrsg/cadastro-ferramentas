@@ -454,6 +454,8 @@ void commit(){
 
 	}
 	else	{		printf("Erro na copia... arquivo origem não existe...");		getche();	}
+	mem=fopen("incluir.txt", "w");
+	altrem=fopen("copiabanco","w");
 	feof(mem);feof(arquivo);
 }
 
