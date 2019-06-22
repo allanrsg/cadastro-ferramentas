@@ -457,6 +457,8 @@ void commit(){
 	mem=fopen("incluir.txt", "w");
 	altrem=fopen("copiabanco","w");
 	feof(mem);feof(arquivo);
+	gotoxy(10,10);	printf("Commitado! Tecle algo para voltar ao menu...");
+	getch();
 }
 
 void rollback(){}
